@@ -39,30 +39,28 @@ const DEMO_DATA = {
 }
 
 export const fetchWebconnexData = async () => {
-  try {
-    // Use demo data immediately for testing
-    console.log('Using demo data for dashboard')
-    
-    const revenue = DEMO_DATA.registrations.reduce((total, reg) => {
-      return total + (parseFloat(reg.amount) || 0)
-    }, 0)
+  console.log('Fetching dashboard data...')
+  
+  // Return demo data immediately for local testing
+  const revenue = DEMO_DATA.registrations.reduce((total, reg) => {
+    return total + (parseFloat(reg.amount) || 0)
+  }, 0)
 
-    return {
-      events: DEMO_DATA.events.map(event => ({
-        id: event.id,
-        name: event.name,
-        date: event.date,
-        status: event.status,
-        registrations: event.registrationCount || 0,
-      })),
-      registrations: DEMO_DATA.registrations,
-      attendees: DEMO_DATA.attendees,
-      revenue,
-    }
-  } catch (error) {
-    console.error('Error in fetchWebconnexData:', error)
-    throw error
+  const response = {
+    events: DEMO_DATA.events.map(event => ({
+      id: event.id,
+      name: event.name,
+      date: event.date,
+      status: event.status,
+      registrations: event.registrationCount || 0,
+    })),
+    registrations: DEMO_DATA.registrations,
+    attendees: DEMO_DATA.attendees,
+    revenue,
   }
+  
+  console.log('Dashboard data loaded:', response)
+  return response
 }
 
 export const getEventById = async (eventId) => {
