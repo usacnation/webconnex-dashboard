@@ -1,7 +1,6 @@
-// Webconnex API Service
+// Webconnex API Service - Using Local Webhook Server
 
-const API_KEY = import.meta.env.VITE_WEBCONNEX_API_KEY || '36c3784827eb45799d4e54c8cedc36ce'
-const BASE_URL = 'https://api.webconnex.com/v2/public'
+const WEBHOOK_SERVER = import.meta.env.VITE_WEBHOOK_SERVER || 'http://localhost:5000'
 
 // Demo/Mock Data (fallback)
 const DEMO_DATA = {
@@ -38,78 +37,28 @@ const DEMO_DATA = {
   ],
 }
 
-const apiClient = async (endpoint, options = {}) => {
-  try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'apiKey': API_KEY,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('API Error:', error)
-    throw error
-  }
-}
-
 export const fetchWebconnexData = async () => {
   try {
-    console.log('Fetching data from Webconnex API...')
+    console.log('Fetching data from local webhook server...')
     
-    // Fetch registrants from Webconnex
-    const registrantsResponse = await apiClient('/search/registrants?product=redpodium.com2&pretty=true')
+    const response = await fetch(`${WEBHOOK_SERVER}/api/registrations`)
     
-    console.log('Registrants Response:', registrantsResponse)
-    
-    // Transform the API response to match our dashboard format
-    const registrations = registrantsResponse.results || []
-    
-    // Calculate metrics
-    const uniqueEvents = [...new Set(registrations.map(r => r.product?.name || 'Unknown'))]
-    const events = uniqueEvents.map((name, index) => {
-      const eventRegistrations = registrations.filter(r => r.product?.name === name)
-      return {
-        id: index + 1,
-        name: name,
-        date: registrations[0]?.createdDate || new Date().toISOString().split('T')[0],
-        status: 'active',
-        registrations: eventRegistrations.length,
-      }
-    })
-    
-    const revenue = registrations.reduce((total, reg) => {
-      return total + (parseFloat(reg.totalDue) || parseFloat(reg.amountPaid) || 0)
-    }, 0)
-    
-    const attendees = registrations.map((reg, index) => ({
-      id: index + 1,
-      name: `${reg.firstName || ''} ${reg.lastName || ''}`.trim() || 'Unknown',
-      email: reg.email || 'N/A',
-      event: reg.product?.name || 'Unknown',
-    }))
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`)
+    }
 
+    const data = await response.json()
+    
+    console.log('Data loaded from webhook server:', data)
+    
     return {
-      events,
-      registrations: registrations.map((reg, index) => ({
-        id: index + 1,
-        eventName: reg.product?.name || 'Unknown',
-        date: reg.createdDate || new Date().toISOString().split('T')[0],
-        amount: parseFloat(reg.totalDue) || parseFloat(reg.amountPaid) || 0,
-        attendeeName: `${reg.firstName || ''} ${reg.lastName || ''}`.trim() || 'Unknown',
-      })),
-      attendees,
-      revenue,
+      events: data.events || [],
+      registrations: data.registrations || [],
+      attendees: data.attendees || [],
+      revenue: data.revenue || 0,
     }
   } catch (error) {
-    console.error('Error fetching Webconnex data, falling back to demo data:', error)
+    console.error('Error fetching from webhook server, falling back to demo data:', error)
     
     // Fallback to demo data
     const revenue = DEMO_DATA.registrations.reduce((total, reg) => {
@@ -126,16 +75,16 @@ export const fetchWebconnexData = async () => {
 }
 
 export const getEventById = async (eventId) => {
-  // This would need to be implemented based on Webconnex API
+  // This would need to be implemented based on your needs
   return null
 }
 
 export const getEventRegistrations = async (eventId) => {
-  // This would need to be implemented based on Webconnex API
+  // This would need to be implemented based on your needs
   return []
 }
 
 export const getEventAttendees = async (eventId) => {
-  // This would need to be implemented based on Webconnex API
+  // This would need to be implemented based on your needs
   return []
 }
