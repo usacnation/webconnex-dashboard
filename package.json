@@ -1,0 +1,26 @@
+{
+  "name": "webconnex-dashboard",
+  "version": "1.0.0",
+  "description": "Webconnex API Dashboard - Display events, attendees, registrations, and revenue",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "axios": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "vite": "^4.3.9",
+    "@vitejs/plugin-react": "^4.0.3"
+  }
+}
